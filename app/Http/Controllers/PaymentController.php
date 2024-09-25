@@ -50,7 +50,7 @@ class PaymentController extends Controller
         $total = $request->total; // Montant à payer
         $nom = $request->nom; // Nom du payeur
         $mail = 'mail@mail.com'; // Adresse email du payeur
-        $site_url = 'https://karimrafanambinantsoa.vercel.app'; // URL du site e-commerce
+        $site_url = 'https://decryptage-vanila.onrender.com/'; // URL du site e-commerce
         $ip = $request->ip(); // Adresse IP du client (Laravel peut détecter l'IP)
         $now = new DateTime(); // Date du paiement
         $daty = $now->format('Y-m-d'); // Formattage de date
