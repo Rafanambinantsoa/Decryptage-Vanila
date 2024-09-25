@@ -14,10 +14,19 @@ class PaymentController extends Controller
     //Pour le message de success
     public function success(Request $request)
     {
+        // Récupérer tous les paramètres de la requête
+        $allQueries = $request->query(); // ou $request->all()
 
-        Mail::raw('Test email', function ($message) {
+        // Convertir les paramètres en texte lisible
+        $queryString = '';
+        foreach ($allQueries as $key => $value) {
+            $queryString .= ucfirst($key) . ': ' . $value . "\n";
+        }
+
+        // Envoyer l'email avec les paramètres dans le corps
+        Mail::raw("Les détails de la requête :\n" . $queryString, function ($message) {
             $message->to('akutagawakarim@gmail.com')
-                ->subject('Test Email Subject');
+                ->subject('Détails de la transaction - Succès');
         });
 
         return response(200);
@@ -47,8 +56,8 @@ class PaymentController extends Controller
         $daty = $now->format('Y-m-d'); // Formattage de date
 
         // Clés de sécurité
-        $public_key = '4c36cff9f00736b959c123ffcabf853aeae44d956b66f35f43'; // Clé publique obtenue de la plateforme AriaryNet
-        $private_key = 'f15df968cc90b8dc117a3c041e403ee96659333c34a3978339'; // Clé privée obtenue de la plateforme AriaryNet
+        $public_key = '24362d970ca7ebb06d29c9bd15781b6f7bb26adb92f173ba81'; // Clé publique obtenue de la plateforme AriaryNet
+        $private_key = 'b76ed57c580057ef11d2d4f0c5de186dc7631479645106774c'; // Clé privée obtenue de la plateforme AriaryNet
 
         // Authentification pour obtenir le token
         $auth_params = [
