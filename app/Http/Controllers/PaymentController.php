@@ -125,7 +125,7 @@ class PaymentController extends Controller
         // Décryptage de l'ID de paiement (vérifiez d'abord si $result est correct)
         $des->setKey($private_key);
         $id = $des->decrypt($result);
-        dd($id);
-        return response($id);
+        // dd($id);
+        return redirect()->away("https://moncompte.ariarynet.com/payer/{$id}");
     }
 }
