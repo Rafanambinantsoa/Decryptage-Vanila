@@ -5,7 +5,6 @@ COPY . .
 
 # Copier les scripts et le crontab
 COPY docker/mon_script.sh /var/www/html/mon_script.sh
-COPY docker/crontab /var/spool/cron/crontabs/root
 
 # Démarrer le service cron
 RUN echo "* * * * * /var/www/html/mon_script.sh" > /etc/crontabs/root
