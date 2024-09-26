@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use phpseclib\Crypt\TripleDES;
 use DateTime;
+use Exception;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
 
@@ -17,19 +19,41 @@ class PaymentController extends Controller
         // Récupérer tous les paramètres de la requête
         $allQueries = $request->query(); // ou $request->all()
 
-        // Convertir les paramètres en texte lisible
-        $queryString = '';
-        foreach ($allQueries as $key => $value) {
-            $queryString .= ucfirst($key) . ': ' . $value . "\n";
+        $private_key = 'b76ed57c580057ef11d2d4f0c5de186dc7631479645106774c'; // Clé privée obtenue de la plateforme AriaryNet
+
+        // Initialiser le décryptage TripleDES avec mode CBC et IV
+        $des = new TripleDES();
+        $des->setKey($private_key);
+
+        // Tableau pour stocker les données décryptées
+        $decryptedData = [];
+
+        try {
+            foreach ($allQueries as $key => $value) {
+                // Tentative de décryptage des valeurs
+                $decryptedValue = $des->decrypt($value);
+                $decryptedData[ucfirst($key)] = $decryptedValue;
+            }
+        } catch (Exception $e) {
+            // En cas d'erreur de décryptage, logguer l'exception
+            Log::error('Erreur lors du décryptage: ' . $e->getMessage());
+            return response()->json(['error' => 'Erreur lors du décryptage'], 500);
+        }
+
+        // Construire l'affichage des données décryptées sous forme de texte structuré
+        $messageContent = "Les détails de la requête :\n";
+        foreach ($decryptedData as $key => $value) {
+            $messageContent .= "$key : $value\n";
         }
 
         // Envoyer l'email avec les paramètres dans le corps
-        Mail::raw("Les détails de la requête :\n" . $queryString, function ($message) {
+        Mail::raw($messageContent, function ($message) {
             $message->to('akutagawakarim@gmail.com')
                 ->subject('Détails de la transaction - Succès');
         });
 
-        return response(200);
+        // Retourner une réponse HTTP 200 avec un message de confirmation
+        return response()->json(['message' => 'Détails envoyés avec succès.'], 200);
     }
 
     //Pour le demarage du paiment vanila pay 
