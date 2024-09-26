@@ -13,13 +13,107 @@ use Illuminate\Support\Facades\Validator as FacadesValidator;
 
 class PaymentController extends Controller
 {
+    private $client_id = "399_4umss3k06x6oc8gcg04gcw4wokkokw080wssg40k040oksk8c4";
+    private $client_secret = "2fbaa5olmlxc8o4ssco40oosk840840k40ckk0008k8wggc80w";
+
+    private $private_key = "da0260f7f9d901bc11fcf1389fdd68885eaf201b47a3c1044a";
+    private $public_key = "e96dd192e2f642f207611eacca6620b6bf1a1058761ef91958";
+
+
+    //lien de retour si il y a une erreur askip
+    public function fail(Request $request)
+    {
+
+        // Récupérer tous les paramètres de la requête
+        $allQueries = $request->query(); // ou $request->all()
+
+        $private_key = $this->private_key; // Clé privée obtenue de la plateforme AriaryNet
+
+        // Initialiser le décryptage TripleDES avec mode CBC et IV
+        $des = new TripleDES();
+        $des->setKey($private_key);
+
+        // Tableau pour stocker les données décryptées
+        $decryptedData = [];
+
+        try {
+            foreach ($allQueries as $key => $value) {
+                // Tentative de décryptage des valeurs
+                $decryptedValue = $des->decrypt($value);
+                $decryptedData[ucfirst($key)] = $decryptedValue;
+            }
+        } catch (Exception $e) {
+            // En cas d'erreur de décryptage, logguer l'exception
+            Log::error('Erreur lors du décryptage: ' . $e->getMessage());
+            return response()->json(['error' => 'Erreur lors du décryptage'], 500);
+        }
+
+        // Construire l'affichage des données décryptées sous forme de texte structuré
+        $messageContent = "Les détails de la requête ERROR return mon pote in case :\n";
+        foreach ($decryptedData as $key => $value) {
+            $messageContent .= "$key : $value\n";
+        }
+
+        // Envoyer l'email avec les paramètres dans le corps
+        Mail::raw($messageContent, function ($message) {
+            $message->to('akutagawakarim@gmail.com')
+                ->subject('Détails de la transaction - Erreur');
+        });
+
+        // Retourner une réponse HTTP 200 avec un message de confirmation
+        return response()->json(['message' => 'Détails envoyés avec succès.'], 200);
+    }
+
+    // return  hono
+    public function returnI(Request $request)
+    {
+        // Récupérer tous les paramètres de la requête
+        $allQueries = $request->query(); // ou $request->all()
+
+        $private_key = $this->private_key; // Clé privée obtenue de la plateforme AriaryNet
+
+        // Initialiser le décryptage TripleDES avec mode CBC et IV
+        $des = new TripleDES();
+        $des->setKey($private_key);
+
+        // Tableau pour stocker les données décryptées
+        $decryptedData = [];
+
+        try {
+            foreach ($allQueries as $key => $value) {
+                // Tentative de décryptage des valeurs
+                $decryptedValue = $des->decrypt($value);
+                $decryptedData[ucfirst($key)] = $decryptedValue;
+            }
+        } catch (Exception $e) {
+            // En cas d'erreur de décryptage, logguer l'exception
+            Log::error('Erreur lors du décryptage: ' . $e->getMessage());
+            return response()->json(['error' => 'Erreur lors du décryptage'], 500);
+        }
+
+        // Construire l'affichage des données décryptées sous forme de texte structuré
+        $messageContent = "Les détails de la requête RETURN return mon pote in case :\n";
+        foreach ($decryptedData as $key => $value) {
+            $messageContent .= "$key : $value\n";
+        }
+
+        // Envoyer l'email avec les paramètres dans le corps
+        Mail::raw($messageContent, function ($message) {
+            $message->to('akutagawakarim@gmail.com')
+                ->subject('Détails de la transaction - Link Return');
+        });
+
+        // Retourner une réponse HTTP 200 avec un message de confirmation
+        return response()->json(['message' => 'Détails envoyés avec succès.'], 200);
+    }
+
     //Pour le message de success
     public function success(Request $request)
     {
         // Récupérer tous les paramètres de la requête
         $allQueries = $request->query(); // ou $request->all()
 
-        $private_key = 'b76ed57c580057ef11d2d4f0c5de186dc7631479645106774c'; // Clé privée obtenue de la plateforme AriaryNet
+        $private_key = $this->private_key; // Clé privée obtenue de la plateforme AriaryNet
 
         // Initialiser le décryptage TripleDES avec mode CBC et IV
         $des = new TripleDES();
@@ -80,13 +174,13 @@ class PaymentController extends Controller
         $daty = $now->format('Y-m-d'); // Formattage de date
 
         // Clés de sécurité
-        $public_key = '24362d970ca7ebb06d29c9bd15781b6f7bb26adb92f173ba81'; // Clé publique obtenue de la plateforme AriaryNet
-        $private_key = 'b76ed57c580057ef11d2d4f0c5de186dc7631479645106774c'; // Clé privée obtenue de la plateforme AriaryNet
+        $public_key = $this->public_key; // Clé publique obtenue de la plateforme AriaryNet
+        $private_key = $this->private_key;; // Clé privée obtenue de la plateforme AriaryNet
 
         // Authentification pour obtenir le token
         $auth_params = [
-            'client_id' => '399_4umss3k06x6oc8gcg04gcw4wokkokw080wssg40k040oksk8c4',
-            'client_secret' => '2fbaa5olmlxc8o4ssco40oosk840840k40ckk0008k8wggc80w',
+            'client_id' => $this->client_id,
+            'client_secret' => $this->client_secret,
             'grant_type' => 'client_credentials'
         ];
 
