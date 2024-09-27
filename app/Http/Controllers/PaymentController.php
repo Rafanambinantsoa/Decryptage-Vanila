@@ -19,7 +19,7 @@ class PaymentController extends Controller
         // Récupérer tous les paramètres de la requête
         $allQueries = $request->query(); // ou $request->all()
 
-        $private_key = 'b76ed57c580057ef11d2d4f0c5de186dc7631479645106774c'; // Clé privée obtenue de la plateforme AriaryNet
+        $private_key = '557c4156857a18e02269efdffa18f0d089c33ec950b0057438'; // Clé privée obtenue de la plateforme AriaryNet
 
         // Initialiser le décryptage TripleDES avec mode CBC et IV
         $des = new TripleDES();
@@ -160,5 +160,48 @@ class PaymentController extends Controller
         $id = $des->decrypt($result);
         // dd($id);
         return redirect()->away("https://moncompte.ariarynet.com/payer/{$id}");
+    }
+
+    //Pour le message de success
+    public function failed(Request $request)
+    {
+        // Récupérer tous les paramètres de la requête
+        $allQueries = $request->query(); // ou $request->all()
+
+        $private_key = '557c4156857a18e02269efdffa18f0d089c33ec950b0057438'; // Clé privée obtenue de la plateforme AriaryNet
+
+        // Initialiser le décryptage TripleDES avec mode CBC et IV
+        $des = new TripleDES();
+        $des->setKey($private_key);
+
+        // Tableau pour stocker les données décryptées
+        $decryptedData = [];
+
+        try {
+            foreach ($allQueries as $key => $value) {
+                // Tentative de décryptage des valeurs
+                $decryptedValue = $des->decrypt($value);
+                $decryptedData[ucfirst($key)] = $decryptedValue;
+            }
+        } catch (Exception $e) {
+            // En cas d'erreur de décryptage, logguer l'exception
+            Log::error('Erreur lors du décryptage: ' . $e->getMessage());
+            return response()->json(['error' => 'Erreur lors du décryptage'], 500);
+        }
+
+        // Construire l'affichage des données décryptées sous forme de texte structuré
+        $messageContent = "Les détails de la requête ERROR :\n";
+        foreach ($decryptedData as $key => $value) {
+            $messageContent .= "$key : $value\n";
+        }
+
+        // Envoyer l'email avec les paramètres dans le corps
+        Mail::raw($messageContent, function ($message) {
+            $message->to('akutagawakarim@gmail.com')
+                ->subject('Détails de la transaction - ERROR');
+        });
+
+        // Retourner une réponse HTTP 200 avec un message de confirmation
+        return response()->json(['message' => 'Détails envoyés avec succès.'], 200);
     }
 }
