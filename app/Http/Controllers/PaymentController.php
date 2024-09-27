@@ -131,10 +131,10 @@ class PaymentController extends Controller
         // Chiffrement des paramètres
         $params_crypt = $des->encrypt(json_encode($params_to_send));
         // Paramètres envoyés à l'API
-        $kim = array(
-            "params"   => $params_crypt,
-            "site_url" => $site_url
-        );
+        // $kim = array(
+        //     "params"   => $params_crypt,
+        //     "site_url" => $site_url
+        // );
         // $params['site_url'] = $site_url;
 
         // Appel de l'API pour obtenir l'ID de paiement
