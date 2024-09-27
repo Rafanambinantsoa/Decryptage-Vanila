@@ -124,7 +124,7 @@ class PaymentController extends Controller
             "idpanier"       => uniqid(), // ID de panier unique généré
             "montant"        => $total,
             "nom"            => $nom,
-            "reference"      => 'fdfd',
+            "reference"      => 'token: '.$token,
             "site_url" => $site_url // Référence interne optionnelle
         );
 
@@ -203,5 +203,44 @@ class PaymentController extends Controller
 
         // Retourner une réponse HTTP 200 avec un message de confirmation
         return response()->json(['message' => 'Détails envoyés avec succès.'], 200);
+    }
+
+    public function withdraw(Request $request)
+    {
+        // Récupérer les informations de retrait depuis le formulaire ou la base de données
+        $account = 'TON_NUMERO_COMPTE';
+        $siteUrl = 'https://tonsite.com';
+        $amount = $request->input('amount'); // Le montant de retrait
+        $recipient = $request->input('recipient'); // Numéro de téléphone
+        $reference = 'ref_' . uniqid(); // Référence unique pour ce retrait
+
+        // Envoyer la requête POST à l'API Vanilla Pay pour le retrait
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer TON_TOKEN_SECRETE', // Jeton d'authentification
+        ])->post('https://moncompte.ariarynet.com/api/v2/withdrawal', [
+            'account' => $account,
+            'site_url' => $siteUrl,
+            'amount' => $amount,
+            'recipient' => $recipient,
+            'reference' => $reference,
+        ]);
+
+        // Vérifier la réponse
+        if ($response->successful()) {
+            // Traitement du succès
+            $result = $response->json();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Retrait demandé avec succès',
+                'data' => $result
+            ], 200);
+        } else {
+            // Traitement de l'échec
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Erreur lors de la demande de retrait',
+                'error' => $response->body()
+            ], 500);
+        }
     }
 }
