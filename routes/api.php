@@ -23,4 +23,5 @@ Route::post('/decrypt',[DecryptController::class , 'initiatePayment']);
 Route::post('/pay',[PaymentController::class , 'initPayment']);
 Route::get('/success',[PaymentController::class , 'success']);
 Route::get('/echec',[PaymentController::class , 'failed']);
+Route::get('/retour',[PaymentController::class , 'failed']);
 
