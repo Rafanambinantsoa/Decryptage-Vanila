@@ -22,4 +22,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/decrypt',[DecryptController::class , 'initiatePayment']);
 Route::post('/pay',[PaymentController::class , 'initPayment']);
 Route::get('/success',[PaymentController::class , 'success']);
+Route::get('/fail',[PaymentController::class , 'failed']);
 
